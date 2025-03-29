@@ -88,6 +88,10 @@ resource "aws_ecs_service" "main" {
     container_name   = var.app_name
     container_port   = var.container_port
   }
+
+  depends_on = [
+    var.target_group_arn
+  ]
 }
 
 data "aws_region" "current" {}

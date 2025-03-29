@@ -45,4 +45,7 @@ module "ecs_service" {
   cluster_name           = module.ecs_cluster.cluster_name
   target_group_arn       = module.load_balancer.target_group_arn
   alb_security_group_id  = module.load_balancer.security_group_id
+  depends_on = [
+    module.load_balancer
+  ]
 }
