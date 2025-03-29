@@ -6,6 +6,7 @@ on:
     paths:
       - 'infrastructure/**'
       - '.github/workflows/deploy.yml'
+  workflow_dispatch: 
 
 permissions:
   id-token: write  # Required for OIDC
