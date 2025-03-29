@@ -46,8 +46,12 @@ variable "container_port" {
   default     = 3000
 }
 
-variable "certificate_arn" {
-  description = "ARN of ACM certificate for HTTPS"
+variable "domain_name" {
+  description = "Domain name for the SSL certificate"
   type        = string
-  default     = null
+}
+
+variable "route53_zone_id" {
+  description = "ID of the Route 53 hosted zone"
+  type        = string
 }

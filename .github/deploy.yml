@@ -1,0 +1,40 @@
+name: Deploy Infrastructure
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infrastructure/**'
+      - '.github/workflows/deploy.yml'
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read   # Required to check out the repository
+
+jobs:
+  deploy:
+    name: Deploy Terraform Infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::654654485498:role/gh-role
+          aws-region: us-east-1  # Adjust if using a different region
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      
+      - name: Terraform Init
+        working-directory: ./infrastructure
+        run: terraform init
+      
+      - name: Terraform Plan
+        working-directory: ./infrastructure
+        run: terraform plan -out=tfplan
+      
+      - name: Terraform Apply
+        working-directory: ./infrastructure
+        run: terraform apply -auto-approve tfplan

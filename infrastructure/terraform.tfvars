@@ -1,0 +1,10 @@
+aws_region = "us-east-1"
+app_name = "hello-world-api"
+vpc_cidr = "10.0.0.0/16"
+private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+public_subnets = ["10.0.101.0/24", "10.0.102.0/24"]
+availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
+repository_name = "hello-world-api"
+container_port = 3000
+domain_name     = "lucasherculano.xyz"
+route53_zone_id = "Z04073202OY1O6A1PI872"

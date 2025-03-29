@@ -56,6 +56,11 @@ To get this into ECR:
    ```
 
 Obviously change the account number, region, etc. as needed.
+You can also use deploy-ecr.sh script
+
+```chmod +x deploy-ecr.sh`
+./deploy-ecr.sh
+```
 
 ## Troubleshooting
 

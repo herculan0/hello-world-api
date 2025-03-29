@@ -25,12 +25,12 @@ module "ecs_cluster" {
 
 module "load_balancer" {
   source = "./modules/load-balancer"
-
+  domain_name       = var.domain_name
+  route53_zone_id   = var.route53_zone_id
   app_name          = var.app_name
   vpc_id            = module.vpc.vpc_id
   public_subnet_ids = module.vpc.public_subnet_ids
   container_port    = var.container_port
-  certificate_arn   = var.certificate_arn
 }
 
 module "ecs_service" {
@@ -45,4 +45,7 @@ module "ecs_service" {
   cluster_name           = module.ecs_cluster.cluster_name
   target_group_arn       = module.load_balancer.target_group_arn
   alb_security_group_id  = module.load_balancer.security_group_id
+  depends_on = [
+    module.load_balancer
+  ]
 }
