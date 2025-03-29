@@ -1,9 +1,7 @@
 name: PR Checks
-
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-
 jobs:
   app-test:
     name: Test application
@@ -33,18 +31,68 @@ jobs:
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
 
-  terraform-validate:
-    name: Validate Terraform
+  terraform-plan:
+    name: Terraform Plan
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::654654485498:role/gh-role
+          aws-region: us-east-1
       
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
       
-      - name: Run terraform init & validate
+      - name: Terraform Init
+        working-directory: ./infrastructure
+        run: terraform init
+      
+      - name: Terraform Validate
+        working-directory: ./infrastructure
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
         working-directory: ./infrastructure
         run: |
-          terraform init -backend=false
-          terraform validate
-          echo "Terraform validation passed!"
+          terraform plan -no-color -out=tfplan
+          echo "PLAN_EXIT_CODE=$?" >> $GITHUB_ENV
+      
+      - name: Show Plan
+        id: show
+        working-directory: ./infrastructure
+        run: |
+          terraform show -no-color tfplan > plan.txt
+          
+      - name: Post Plan to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('./infrastructure/plan.txt', 'utf8');
+            
+            const comment = `### Terraform Plan
+            
+            <details>
+            <summary>Click to see the plan</summary>
+            
+            \`\`\`
+            ${plan}
+            \`\`\`
+            </details>`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
