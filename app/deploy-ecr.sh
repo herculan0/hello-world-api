@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-docker build -t hello-world-api .
+docker build --platform linux/amd64 -t hello-world-api .
 
 cd ../infrastructure
 ECR_REPO=$(terraform output -raw ecr_repository_url)
