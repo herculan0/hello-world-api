@@ -1,0 +1,50 @@
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  app-test:
+    name: Test application
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Build image
+        run: docker build -t hello-world-api ./app
+      
+      - name: Test API endpoints
+        run: |
+          docker run -d -p 3000:3000 hello-world-api
+          sleep 3
+          # Test each endpoint - fail if any return non-200
+          curl -sf http://localhost:3000/hello_world || exit 1
+          curl -sf http://localhost:3000/healthcheck || exit 1
+          curl -sf "http://localhost:3000/current_time?name=Test" || exit 1
+          echo "All API tests passed!"
+          
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'hello-world-api'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+  terraform-validate:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      
+      - name: Run terraform init & validate
+        working-directory: ./infrastructure
+        run: |
+          terraform init -backend=false
+          terraform validate
+          echo "Terraform validation passed!"
