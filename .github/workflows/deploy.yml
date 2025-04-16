@@ -38,4 +38,4 @@ jobs:
       
       - name: Terraform Apply
         working-directory: ./infrastructure
-        run: terraform apply -auto-approve tfplan
+        run: terraform destroy -auto-approve
